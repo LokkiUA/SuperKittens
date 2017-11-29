@@ -129,6 +129,23 @@ namespace SuperKittens.Droid
 
         private async void Save_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(_name.Text))
+            {
+                _name.RequestFocus();
+                Toast.MakeText(this, "Add name", ToastLength.Short).Show();
+                return;
+            }
+            if (string.IsNullOrEmpty(_lastName.Text))
+            {
+                _lastName.RequestFocus();
+                Toast.MakeText(this, "Add last name", ToastLength.Short).Show();
+                return;
+            }
+            if (_imageFile == null)
+            {
+                Toast.MakeText(this, "Add picture", ToastLength.Short).Show();
+                return;
+            }
             _kitten.LastName = _lastName.Text;
             _kitten.Name = _name.Text;
             var bitmap = BitmapFactory.DecodeFile(_imageFile.Path);

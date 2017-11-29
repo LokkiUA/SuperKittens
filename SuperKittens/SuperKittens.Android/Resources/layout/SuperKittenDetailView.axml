@@ -17,17 +17,17 @@
             android:layout_height="200dp"
             android:id="@+id/superKittenImageView" />
         <TextView
-            android:text="Name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/superKittenNameTextView"
-            android:textSize="20dp" />
+            android:textSize="20dp"
+            android:hint="Name" />
         <TextView
-            android:text="Last Name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/superKittenLastNameTextView"
-            android:textSize="20dp" />
+            android:textSize="20dp"
+            android:hint="Last Name" />
         <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
