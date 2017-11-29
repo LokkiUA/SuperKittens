@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.OS;
@@ -20,6 +16,7 @@ namespace SuperKittens.Droid
         private TextView _name;
         private TextView _lastName;
         private Button _edit;
+        private Button _delete;
         private SuperKittensService _service;
         private SuperKitten _kitten;
         protected override async void OnCreate(Bundle savedInstanceState)
@@ -36,6 +33,20 @@ namespace SuperKittens.Droid
             BindData();
 
             _edit.Click += Edit_Click;
+            _delete.Click += Delete_Click;
+        }
+
+        private void Delete_Click(object sender, EventArgs e)
+        {
+            var unused = new AlertDialog.Builder(this)
+                .SetTitle($"Are you sure you want to delete {_kitten.Name} {_kitten.LastName}")
+                .SetPositiveButton("Yes", async (o, args) =>
+                {
+                    await _service.Delete(_kitten.Id);
+                    Finish();
+                })
+                .SetNegativeButton("No", (o, args) => { })
+                .Show();
         }
 
         private void Edit_Click(object sender, EventArgs e)
@@ -60,6 +71,7 @@ namespace SuperKittens.Droid
             _name = FindViewById<TextView>(Resource.Id.superKittenNameTextView);
             _lastName = FindViewById<TextView>(Resource.Id.superKittenLastNameTextView);
             _edit = FindViewById<Button>(Resource.Id.editButton);
+            _delete = FindViewById<Button>(Resource.Id.deleteButton);
         }
     }
 }

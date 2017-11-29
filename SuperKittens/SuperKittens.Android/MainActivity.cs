@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Android.App;
 using Android.Content;
 using Android.Widget;
@@ -19,6 +18,7 @@ namespace SuperKittens.Droid
         private ListView _kittensListView;
         private SwipeRefreshLayout _refresher;
         private Button _add;
+        private ProgressDialog _progress;
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
@@ -26,20 +26,41 @@ namespace SuperKittens.Droid
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
 
+            _progress = new ProgressDialog(this)
+            {
+                Indeterminate = true
+            };
+            _progress.SetProgressStyle(ProgressDialogStyle.Spinner);
+            _progress.SetMessage("Loading... Please wait...");
+            _progress.SetCancelable(false);
+
+
             _kittensService = new SuperKittensService();
 
+            FindViews();
+            BindEvents();
+            
+
+        }
+
+        private void BindEvents()
+        {
+            _refresher.Refresh += Refresher_Refresh;
+            _add.Click += Add_Click;
+            _kittensListView.ItemClick += KittensListView_ItemClick;
+        }
+
+        private void Refresher_Refresh(object sender, System.EventArgs e)
+        {
+            BindData();
+            _refresher.Refreshing = false;
+        }
+
+        private void FindViews()
+        {
             _kittensListView = FindViewById<ListView>(Resource.Id.SuperKittensListView);
             _refresher = FindViewById<SwipeRefreshLayout>(Resource.Id.refresher);
             _add = FindViewById<Button>(Resource.Id.addButton);
-
-            _refresher.Refresh += delegate
-            {
-                BindData();
-                _refresher.Refreshing = false;
-            };
-            _add.Click += Add_Click;
-
-            _kittensListView.ItemClick += KittensListView_ItemClick;
         }
 
         private void Add_Click(object sender, System.EventArgs e)
@@ -60,9 +81,14 @@ namespace SuperKittens.Droid
 
         private async void BindData()
         {
+            _progress.Show();
             _allKittens = await _kittensService.GetAll();
 
-            _kittensListView.Adapter = new SuperKittensAdapter(this, _allKittens);
+            var adapter = new SuperKittensAdapter(this, _allKittens);
+            _kittensListView.Adapter = adapter;
+
+            _progress.Hide();
+
         }
 
         private void KittensListView_ItemClick(object sender, AdapterView.ItemClickEventArgs e)

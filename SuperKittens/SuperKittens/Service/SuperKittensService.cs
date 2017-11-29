@@ -22,19 +22,23 @@ namespace SuperKittens.Service
             return await KittenRepository.GetById(id);
         }
 
-        public SuperKitten Create(SuperKitten superKitten)
+        public async Task<SuperKitten> Create(SuperKitten superKitten, byte[] picture)
         {
-            return KittenRepository.Create(superKitten);
+            var res = await KittenRepository.Create(superKitten);
+            await KittenRepository.AddPicture(res.Id, picture);
+            return res;
         }
 
-        public async Task<SuperKitten> Update(SuperKitten superKitten)
+        public async Task<SuperKitten> Update(SuperKitten superKitten, byte[] picture)
         {
-            return await KittenRepository.Update(superKitten);
+            var res = await KittenRepository.Update(superKitten);
+            await KittenRepository.AddPicture(superKitten.Id, picture);
+            return res;
         }
 
-        public bool Delete(int id)
+        public async Task<bool> Delete(int id)
         {
-            return KittenRepository.Delete(id);
+            return await KittenRepository.Delete(id);
         }
     }
 }

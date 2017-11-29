@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using Android.App;
 using Android.Content;
 using Android.Graphics;
 using Android.OS;
 using Android.Provider;
 using Android.Widget;
-using Java.IO;
 using SuperKittens.Droid.Utility;
 using SuperKittens.Models;
 using SuperKittens.Service;
+using File = Java.IO.File;
 
 namespace SuperKittens.Droid
 {
@@ -75,20 +72,17 @@ namespace SuperKittens.Droid
             switch (requestCode)
             {
                 case RequestCamera:
-                    int height = _image.Height;
-                    int width = _image.Width;
 
-                    _imageBitmap = BitmapFactory.DecodeFile(_imageFile.Path);//ImageHelper.GetImageBitmapFromFilePath(_imageFile.Path, width, height);
-
+                    _imageBitmap = BitmapFactory.DecodeFile(_imageFile.Path);
                     if (_imageBitmap != null)
                     {
                         _image.SetImageBitmap(_imageBitmap);
                         _imageBitmap = null;
                     }
-
                     //required to avoid memory leaks!
                     GC.Collect();
                     break;
+
                 case SelectFile:
                     _imageFile = new File(data.Data.Path);
                     _image.SetImageURI(data.Data);
@@ -137,15 +131,25 @@ namespace SuperKittens.Droid
         {
             _kitten.LastName = _lastName.Text;
             _kitten.Name = _name.Text;
-            if (_isEditMode)
+            var bitmap = BitmapFactory.DecodeFile(_imageFile.Path);
+
+
+            using (var stream = new MemoryStream())
             {
-                await _service.Update(_kitten);
+                bitmap.Compress(Bitmap.CompressFormat.Jpeg, 50, stream);
+
+                var bytes = stream.ToArray();
+                if (_isEditMode)
+                {
+
+                    await _service.Update(_kitten, bytes);
+
+                }
+                else
+                {
+                    await _service.Create(_kitten, bytes);
+                }
             }
-            else
-            {
-                _service.Create(_kitten);
-            }
-            //OnBackPressed();
             Finish();
         }
 

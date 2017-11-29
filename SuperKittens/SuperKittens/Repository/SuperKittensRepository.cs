@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -50,31 +51,24 @@ namespace SuperKittens.Repository
         }
         private const string ApiRoot = "http://soprasteriasuperkittensapi.azurewebsites.net/api/SuperKittens";
 
-        private readonly HttpClient _client = new HttpClient { Timeout = new TimeSpan(0, 0, 2) };
-        private readonly List<SuperKitten> _data = new List<SuperKitten>
-        {
-            new SuperKitten
-            {
-                Id = 1,
-                LastName = "Test",
-                Name = "Test",
-                PictureUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Kitten_in_Rizal_Park%2C_Manila.jpg/1200px-Kitten_in_Rizal_Park%2C_Manila.jpg"
-            },
-            new SuperKitten
-            {
-                Id = 1,
-                LastName = "Test 2",
-                Name = "Test 2",
-                PictureUrl = "http://www.petwave.com/~/media/Images/Center/Care-and-Nutrition/Cat/Kittensv2/Kitten-3.ashx"
-            }
-        };
+        private readonly HttpClient _client = new HttpClient { Timeout = new TimeSpan(0, 0, 10) };
+
         public async Task<ICollection<SuperKitten>> GetAll()
         {
-            var responce = await Task.Run(() => _client.GetAsync(ApiRoot));
-            if (responce.IsSuccessStatusCode)
+            try
             {
-                var content = await responce.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<List<ApiSuperKitten>>(content).Select(s => s.ToSuperKitten()).ToList();
+                var responce = await Task.Run(() => _client.GetAsync(ApiRoot));
+                if (responce.IsSuccessStatusCode)
+                {
+
+                    var content = await responce.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<List<ApiSuperKitten>>(content).Select(s => s.ToSuperKitten()).ToList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                // who cares?
             }
             return new List<SuperKitten>();
         }
@@ -90,11 +84,15 @@ namespace SuperKittens.Repository
             return new SuperKitten();
         }
 
-        public SuperKitten Create(SuperKitten superKitten)
+        public async Task<SuperKitten> Create(SuperKitten superKitten)
         {
-            superKitten.Id = _data.Max(s => s.Id) + 1;
-            _data.Add(superKitten);
-            return superKitten;
+            var content = new StringContent(JsonConvert.SerializeObject(new ApiSuperKitten(superKitten)), Encoding.UTF8, "application/json");
+            var responce = await _client.PostAsync($"{ApiRoot}", content);
+            if (responce.IsSuccessStatusCode)
+            {
+                return JsonConvert.DeserializeObject<ApiSuperKitten>(await responce.Content.ReadAsStringAsync()).ToSuperKitten();
+            }
+            return null;
         }
 
         public async Task<SuperKitten> Update(SuperKitten superKitten)
@@ -108,15 +106,22 @@ namespace SuperKittens.Repository
             return superKitten;
         }
 
-        public SuperKitten AddPicture(int id, byte[] picture)
+        public async Task<SuperKitten> AddPicture(int id, byte[] picture)
         {
-            throw new System.NotImplementedException();
+            var form = new MultipartFormDataContent();
+
+            var imageContent = new ByteArrayContent(picture);
+            imageContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+
+            form.Add(imageContent, "file", Guid.NewGuid().ToString());
+            var unused = await Task.Run(() => _client.PutAsync($"{ApiRoot}/{id}/picture", form));
+            return await GetById(id);
         }
 
-        public bool Delete(int id)
+        public async Task<bool> Delete(int id)
         {
-            _data.Remove(_data.FirstOrDefault(r => r.Id == id));
-            return true;
+            var responce = await _client.DeleteAsync($"{ApiRoot}/{id}");
+            return responce.IsSuccessStatusCode;
         }
     }
 }
