@@ -28,7 +28,11 @@ namespace SuperKittens.Droid
         private SuperKitten _kitten;
         private File _imageFile;
         private Bitmap _imageBitmap;
-        protected override void OnCreate(Bundle savedInstanceState)
+        private const int RequestCamera = 0;
+        private const int SelectFile = 1;
+
+        private bool _isEditMode;
+        protected override async void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             SetContentView(Resource.Layout.SuperKittenEditView);
@@ -36,54 +40,113 @@ namespace SuperKittens.Droid
             FindViews();
 
             var selectedId = Intent.Extras.GetInt("selectedSuperKittenId");
+            _isEditMode = selectedId > 0;
             _service = new SuperKittensService();
-            _kitten = _service.GetById(selectedId);
 
-            BindData();
+            if (_isEditMode)
+            {
+                _kitten = await _service.GetById(selectedId);
+
+                BindData();
+            }
+            else
+            {
+                _kitten = new SuperKitten();
+            }
 
             _save.Click += Save_Click;
             _image.Click += TakePicture_Click;
+            _cancel.Click += CancelOnClick;
         }
+
+        private void CancelOnClick(object sender, EventArgs eventArgs)
+        {
+            OnBackPressed();
+            Finish();
+        }
+
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
             base.OnActivityResult(requestCode, resultCode, data);
 
-            int height = _image.Height;
-            int width = _image.Width;
-            _imageBitmap = ImageHelper.GetImageBitmapFromFilePath(_imageFile.Path, width, height);
+            if (resultCode != Result.Ok)
+                return;
 
-            if (_imageBitmap != null)
+            switch (requestCode)
             {
-                _image.SetImageBitmap(_imageBitmap);
-                _imageBitmap = null;
+                case RequestCamera:
+                    int height = _image.Height;
+                    int width = _image.Width;
+
+                    _imageBitmap = BitmapFactory.DecodeFile(_imageFile.Path);//ImageHelper.GetImageBitmapFromFilePath(_imageFile.Path, width, height);
+
+                    if (_imageBitmap != null)
+                    {
+                        _image.SetImageBitmap(_imageBitmap);
+                        _imageBitmap = null;
+                    }
+
+                    //required to avoid memory leaks!
+                    GC.Collect();
+                    break;
+                case SelectFile:
+                    _imageFile = new File(data.Data.Path);
+                    _image.SetImageURI(data.Data);
+                    break;
             }
 
-            //required to avoid memory leaks!
-            GC.Collect();
         }
 
         private void TakePicture_Click(object sender, EventArgs e)
         {
-            var intent = new Intent(MediaStore.ActionImageCapture);
-            var imageDirectory = new File(Android.OS.Environment.GetExternalStoragePublicDirectory(
-                Android.OS.Environment.DirectoryPictures), "SuperKittens");
-
-            if (!imageDirectory.Exists())
+            string[] items = { "Take Photo", "Choose from Library", "Cancel" };
+            using (var dialogBuilder = new AlertDialog.Builder(this))
             {
-                imageDirectory.Mkdirs();
-            }
-            _imageFile = new File(imageDirectory, Guid.NewGuid().ToString());
-            intent.PutExtra(MediaStore.ExtraOutput, Android.Net.Uri.FromFile(_imageFile));
+                dialogBuilder.SetTitle("Add Photo");
+                Intent intent;
+                dialogBuilder.SetItems(items, (o, args) =>
+                {
+                    switch (args.Which)
+                    {
+                        case 0:
+                            intent = new Intent(MediaStore.ActionImageCapture);
+                            var imageDirectory = new File(Android.OS.Environment.GetExternalStoragePublicDirectory(
+                                Android.OS.Environment.DirectoryPictures), "SuperKittens");
 
-            StartActivityForResult(intent, 0);
+                            if (!imageDirectory.Exists())
+                            {
+                                imageDirectory.Mkdirs();
+                            }
+                            _imageFile = new File(imageDirectory, $"superKitten_{Guid.NewGuid()}.jpg");
+                            intent.PutExtra(MediaStore.ExtraOutput, Android.Net.Uri.FromFile(_imageFile));
+
+                            StartActivityForResult(intent, RequestCamera);
+                            break;
+                        case 1:
+                            intent = new Intent(Intent.ActionPick, MediaStore.Images.Media.ExternalContentUri);
+                            intent.SetType("image/*");
+                            StartActivityForResult(Intent.CreateChooser(intent, "Select picture"), SelectFile);
+                            break;
+                    }
+                });
+                dialogBuilder.Show();
+            }
         }
 
-        private void Save_Click(object sender, EventArgs e)
+        private async void Save_Click(object sender, EventArgs e)
         {
             _kitten.LastName = _lastName.Text;
             _kitten.Name = _name.Text;
-            _service.Update(_kitten);
-            OnBackPressed();
+            if (_isEditMode)
+            {
+                await _service.Update(_kitten);
+            }
+            else
+            {
+                _service.Create(_kitten);
+            }
+            //OnBackPressed();
+            Finish();
         }
 
         private void BindData()

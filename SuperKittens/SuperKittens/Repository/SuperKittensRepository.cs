@@ -1,22 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using SuperKittens.Models;
 
 namespace SuperKittens.Repository
 {
-    public interface ISuperKittenRepository
+    internal class SuperKittensRepository
     {
-        ICollection<SuperKitten> GetAll();
-        SuperKitten GetById(int id);
-        SuperKitten Create(SuperKitten superKitten);
-        SuperKitten Update(SuperKitten superKitten);
-        bool Delete(int id);
-    }
-    internal class SuperKittensRepository : ISuperKittenRepository
-    {
+        private class Picture
+        {
+            public int Id { get; set; }
+            public string Url { get; set; }
+        }
+
+        private class ApiSuperKitten
+        {
+            public ApiSuperKitten()
+            {
+
+            }
+
+            public ApiSuperKitten(SuperKitten superKitten)
+            {
+                Id = superKitten.Id;
+                Name = superKitten.Name;
+                LastName = superKitten.LastName;
+                Picture = null;
+            }
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public string LastName { get; set; }
+            public Picture Picture { get; set; }
+
+            public SuperKitten ToSuperKitten()
+            {
+                return new SuperKitten
+                {
+                    Id = Id,
+                    LastName = LastName,
+                    Name = Name,
+                    PictureUrl = Picture?.Url
+                };
+            }
+        }
+        private const string ApiRoot = "http://soprasteriasuperkittensapi.azurewebsites.net/api/SuperKittens";
+
+        private readonly HttpClient _client = new HttpClient { Timeout = new TimeSpan(0, 0, 2) };
         private readonly List<SuperKitten> _data = new List<SuperKitten>
         {
             new SuperKitten
@@ -34,14 +68,26 @@ namespace SuperKittens.Repository
                 PictureUrl = "http://www.petwave.com/~/media/Images/Center/Care-and-Nutrition/Cat/Kittensv2/Kitten-3.ashx"
             }
         };
-        public ICollection<SuperKitten> GetAll()
+        public async Task<ICollection<SuperKitten>> GetAll()
         {
-            return _data;
+            var responce = await Task.Run(() => _client.GetAsync(ApiRoot));
+            if (responce.IsSuccessStatusCode)
+            {
+                var content = await responce.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<List<ApiSuperKitten>>(content).Select(s => s.ToSuperKitten()).ToList();
+            }
+            return new List<SuperKitten>();
         }
 
-        public SuperKitten GetById(int id)
+        public async Task<SuperKitten> GetById(int id)
         {
-            return _data.FirstOrDefault(r => r.Id == id);
+            var responce = await Task.Run(() => _client.GetAsync($"{ApiRoot}/{id}"));
+            if (responce.IsSuccessStatusCode)
+            {
+                var content = await responce.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<ApiSuperKitten>(content).ToSuperKitten();
+            }
+            return new SuperKitten();
         }
 
         public SuperKitten Create(SuperKitten superKitten)
@@ -51,12 +97,20 @@ namespace SuperKittens.Repository
             return superKitten;
         }
 
-        public SuperKitten Update(SuperKitten superKitten)
+        public async Task<SuperKitten> Update(SuperKitten superKitten)
         {
-            var temp = _data.FirstOrDefault(r => r.Id == superKitten.Id);
-            _data.Remove(temp);
-            _data.Add(superKitten);
+            var content = new StringContent(JsonConvert.SerializeObject(new ApiSuperKitten(superKitten)), Encoding.UTF8, "application/json");
+            var responce = await _client.PutAsync($"{ApiRoot}/{superKitten.Id}", content);
+            if (!responce.IsSuccessStatusCode)
+            {
+                return null;
+            }
             return superKitten;
+        }
+
+        public SuperKitten AddPicture(int id, byte[] picture)
+        {
+            throw new System.NotImplementedException();
         }
 
         public bool Delete(int id)

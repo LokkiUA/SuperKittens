@@ -5,48 +5,48 @@
     android:layout_width="fill_parent"
     android:layout_height="match_parent"
     android:id="@+id/mainScrollView">
-  <LinearLayout
-      android:orientation="vertical"
-      android:layout_width="fill_parent"
-      android:layout_height="fill_parent"
-      android:paddingRight="20dp"
-      android:paddingLeft="20dp">
-    <ImageView
-        android:src="@drawable/icon"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="fill_parent"
-        android:layout_height="300dp"
-        android:id="@+id/superKittenImageView" />
-    <EditText
-        android:text="Name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/superKittenNameEditText"
-        android:textSize="20dp" />
-    <EditText
-        android:text="Last Name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/superKittenLastNameEditText"
-        android:textSize="20dp" />
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-      <Button
-          android:text="Cancel"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:id="@+id/cancelButton"
-          android:layout_alignParentLeft="true"
-          android:layout_centerInParent="true"
-          android:layout_marginTop="20dp" />
-      <Button
-          android:text="Save"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:id="@+id/saveButton"
-          android:layout_alignParentRight="true"
-          android:layout_centerInParent="true"
-          android:layout_marginTop="20dp" />
-    </RelativeLayout>
-  </LinearLayout>
+        android:layout_height="fill_parent"
+        android:paddingRight="20dp"
+        android:paddingLeft="20dp">
+        <ImageView
+            android:src="@drawable/icon"
+            android:layout_width="fill_parent"
+            android:layout_height="300dp"
+            android:id="@+id/superKittenImageView" />
+        <EditText
+            android:text="Name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/superKittenNameEditText"
+            android:textSize="20dp" />
+        <EditText
+            android:text="Last Name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/superKittenLastNameEditText"
+            android:textSize="20dp" />
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+            <Button
+                android:text="Cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/cancelButton"
+                android:layout_alignParentLeft="true"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="20dp" />
+            <Button
+                android:text="Save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/saveButton"
+                android:layout_alignParentRight="true"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="20dp" />
+        </RelativeLayout>
+    </LinearLayout>
 </ScrollView>

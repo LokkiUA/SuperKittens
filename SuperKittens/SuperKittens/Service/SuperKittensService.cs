@@ -1,23 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using SuperKittens.Models;
 using SuperKittens.Repository;
 
 namespace SuperKittens.Service
 {
-    public class SuperKittensService : ISuperKittenService
+    public class SuperKittensService
     {
         private static readonly SuperKittensRepository KittenRepository = new SuperKittensRepository();
 
 
-        public ICollection<SuperKitten> GetAll()
+        public async Task<List<SuperKitten>> GetAll()
         {
-            return KittenRepository.GetAll().OrderBy(o => o.Name).ToList();
+            var res = await KittenRepository.GetAll();
+            return res.OrderBy(o => o.Name).ToList();
         }
 
-        public SuperKitten GetById(int id)
+        public async Task<SuperKitten> GetById(int id)
         {
-            return KittenRepository.GetById(id);
+            return await KittenRepository.GetById(id);
         }
 
         public SuperKitten Create(SuperKitten superKitten)
@@ -25,9 +27,9 @@ namespace SuperKittens.Service
             return KittenRepository.Create(superKitten);
         }
 
-        public SuperKitten Update(SuperKitten superKitten)
+        public async Task<SuperKitten> Update(SuperKitten superKitten)
         {
-            return KittenRepository.Update(superKitten);
+            return await KittenRepository.Update(superKitten);
         }
 
         public bool Delete(int id)

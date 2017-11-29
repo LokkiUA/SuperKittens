@@ -5,9 +5,22 @@
     android:layout_height="fill_parent"
     android:minWidth="25px"
     android:minHeight="25px">
-  <ListView
-      android:id="@+id/SuperKittensListView"
+  <Button
+    android:id="@+id/addButton"
+    android:text="Add new superkitten"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
+  <android.support.v4.widget.SwipeRefreshLayout
+      android:id="@+id/refresher"
       android:layout_width="fill_parent"
       android:layout_height="fill_parent"
-      android:cacheColorHint="#FFDAFF7F" />
+      android:minWidth="25px"
+      android:minHeight="25px"
+      android:layout_marginBottom="20dp">
+    <ListView
+        android:id="@+id/SuperKittensListView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:cacheColorHint="#FFDAFF7F" />
+  </android.support.v4.widget.SwipeRefreshLayout>
 </LinearLayout>

@@ -22,7 +22,7 @@ namespace SuperKittens.Droid
         private Button _edit;
         private SuperKittensService _service;
         private SuperKitten _kitten;
-        protected override void OnCreate(Bundle savedInstanceState)
+        protected override async void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             SetContentView(Resource.Layout.SuperKittenDetailView);
@@ -31,7 +31,7 @@ namespace SuperKittens.Droid
 
             var selectedId = Intent.Extras.GetInt("selectedSuperKittenId");
             _service = new SuperKittensService();
-            _kitten = _service.GetById(selectedId);
+            _kitten = await _service.GetById(selectedId);
 
             BindData();
 
