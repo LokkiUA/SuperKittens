@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -11,44 +10,8 @@ using SuperKittens.Models;
 
 namespace SuperKittens.Repository
 {
-    internal class SuperKittensRepository
+    internal partial class SuperKittensRepository
     {
-        private class Picture
-        {
-            public int Id { get; set; }
-            public string Url { get; set; }
-        }
-
-        private class ApiSuperKitten
-        {
-            public ApiSuperKitten()
-            {
-
-            }
-
-            public ApiSuperKitten(SuperKitten superKitten)
-            {
-                Id = superKitten.Id;
-                Name = superKitten.Name;
-                LastName = superKitten.LastName;
-                Picture = null;
-            }
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public string LastName { get; set; }
-            public Picture Picture { get; set; }
-
-            public SuperKitten ToSuperKitten()
-            {
-                return new SuperKitten
-                {
-                    Id = Id,
-                    LastName = LastName,
-                    Name = Name,
-                    PictureUrl = Picture?.Url
-                };
-            }
-        }
         private const string ApiRoot = "http://soprasteriasuperkittensapi.azurewebsites.net/api/SuperKittens";
 
         private readonly HttpClient _client = new HttpClient { Timeout = new TimeSpan(0, 0, 10) };
@@ -66,7 +29,7 @@ namespace SuperKittens.Repository
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // who cares?
             }
