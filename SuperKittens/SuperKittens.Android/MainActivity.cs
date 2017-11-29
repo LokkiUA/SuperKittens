@@ -1,35 +1,54 @@
-﻿using System;
-
+﻿using System.Collections.Generic;
+using System.Linq;
 using Android.App;
 using Android.Content;
-using Android.Runtime;
-using Android.Views;
 using Android.Widget;
 using Android.OS;
+using SuperKittens.Droid.Adapters;
+using SuperKittens.Models;
+using SuperKittens.Service;
 
 namespace SuperKittens.Droid
 {
-	[Activity (Label = "SuperKittens.Android", MainLauncher = true, Icon = "@drawable/icon")]
-	public class MainActivity : Activity
-	{
-		int count = 1;
+    [Activity(Label = "Super Kittens", MainLauncher = true, Icon = "@drawable/icon")]
+    public class MainActivity : Activity
+    {
+        private SuperKittensService _kittensService;
+        private List<SuperKitten> _allKittens = new List<SuperKitten>();
+        private ListView _kittensListView;
 
-		protected override void OnCreate (Bundle bundle)
-		{
-			base.OnCreate (bundle);
+        protected override void OnCreate(Bundle bundle)
+        {
+            base.OnCreate(bundle);
 
-			// Set our view from the "main" layout resource
-			SetContentView (Resource.Layout.Main);
+            // Set our view from the "main" layout resource
+            SetContentView(Resource.Layout.Main);
 
-			// Get our button from the layout resource,
-			// and attach an event to it
-			Button button = FindViewById<Button> (Resource.Id.myButton);
-			
-			button.Click += delegate {
-				button.Text = string.Format ("{0} clicks!", count++);
-			};
-		}
-	}
+            _kittensListView = FindViewById<ListView>(Resource.Id.SuperKittensListView);
+
+            _kittensListView.ItemClick += KittensListView_ItemClick;
+        }
+
+        protected override void OnStart()
+        {
+            base.OnStart();
+            _kittensService = new SuperKittensService();
+            _allKittens = _kittensService.GetAll().ToList();
+
+            _kittensListView.Adapter = new SuperKittensAdapter(this, _allKittens);
+        }
+
+        private void KittensListView_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
+        {
+            var kitten = _allKittens[e.Position];
+
+            var intent = new Intent();
+            intent.SetClass(this, typeof(DetailsActivity));
+            intent.PutExtra("selectedSuperKittenId", kitten.Id);
+
+            StartActivityForResult(intent, 100);
+        }
+    }
 }
 
 

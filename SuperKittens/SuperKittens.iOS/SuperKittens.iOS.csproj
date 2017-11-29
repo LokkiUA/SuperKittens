@@ -4,7 +4,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
     <ProjectTypeGuids>{FEACFBD2-3405-455C-9665-78FE426C6842};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>895f4281-0828-4e6d-b94d-4971ab075b60</ProjectGuid>
+    <ProjectGuid>{895F4281-0828-4E6D-B94D-4971AB075B60}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>SuperKittens.iOS</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
@@ -69,6 +69,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SuperKittens\SuperKittens.csproj">
       <Name>SuperKittens</Name>
+      <Project>{A93536BB-BA8B-425C-B5A8-F5BB3C728501}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
