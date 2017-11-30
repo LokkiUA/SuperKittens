@@ -141,31 +141,41 @@ namespace SuperKittens.Droid
                 Toast.MakeText(this, "Add last name", ToastLength.Short).Show();
                 return;
             }
-            if (_imageFile == null)
+            if (_imageFile == null && string.IsNullOrEmpty(_kitten.PictureUrl))
             {
                 Toast.MakeText(this, "Add picture", ToastLength.Short).Show();
                 return;
             }
             _kitten.LastName = _lastName.Text;
             _kitten.Name = _name.Text;
-            var bitmap = BitmapFactory.DecodeFile(_imageFile.Path);
 
-
-            using (var stream = new MemoryStream())
+            byte[] bytes;
+            if (_imageFile != null)
             {
-                bitmap.Compress(Bitmap.CompressFormat.Jpeg, 50, stream);
+                var bitmap = BitmapFactory.DecodeFile(_imageFile.Path);
 
-                var bytes = stream.ToArray();
-                if (_isEditMode)
+
+                using (var stream = new MemoryStream())
                 {
+                    bitmap.Compress(Bitmap.CompressFormat.Jpeg, 50, stream);
 
-                    await _service.Update(_kitten, bytes);
+                    bytes = stream.ToArray();
 
                 }
-                else
-                {
-                    await _service.Create(_kitten, bytes);
-                }
+            }
+            else
+            {
+                bytes = null;
+            }
+            if (_isEditMode)
+            {
+
+                await _service.Update(_kitten, bytes);
+
+            }
+            else
+            {
+                await _service.Create(_kitten, bytes);
             }
             Finish();
         }

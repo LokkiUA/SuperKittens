@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SuperKittens.Models;
+using SuperKittens.Repository.ApiModels;
 
 namespace SuperKittens.Repository
 {

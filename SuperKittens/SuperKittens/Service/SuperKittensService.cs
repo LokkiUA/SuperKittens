@@ -25,14 +25,16 @@ namespace SuperKittens.Service
         public async Task<SuperKitten> Create(SuperKitten superKitten, byte[] picture)
         {
             var res = await KittenRepository.Create(superKitten);
-            await KittenRepository.AddPicture(res.Id, picture);
+            if (picture != null)
+                await KittenRepository.AddPicture(res.Id, picture);
             return res;
         }
 
         public async Task<SuperKitten> Update(SuperKitten superKitten, byte[] picture)
         {
             var res = await KittenRepository.Update(superKitten);
-            await KittenRepository.AddPicture(superKitten.Id, picture);
+            if (picture != null)
+                await KittenRepository.AddPicture(superKitten.Id, picture);
             return res;
         }
 

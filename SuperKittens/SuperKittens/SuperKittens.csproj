@@ -35,9 +35,9 @@
   <ItemGroup>
     <Compile Include="Models\SuperKitten.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Repository\SuperKittensRepository.ApiSuperKitten.cs" />
+    <Compile Include="Repository\ApiModels\ApiSuperKitten.cs" />
+    <Compile Include="Repository\ApiModels\Picture.cs" />
     <Compile Include="Repository\SuperKittensRepository.cs" />
-    <Compile Include="Repository\SuperKittensRepository.Picture.cs" />
     <Compile Include="Service\SuperKittensService.cs" />
   </ItemGroup>
   <ItemGroup>
